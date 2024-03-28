@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Article;
 
 class PageController extends Controller
 {
+    /*
     public $articles;
     public function __construct()
     {
@@ -38,7 +40,7 @@ class PageController extends Controller
         ];
 
     }
-
+*/
     public function homePage()
     {
         $titleHomePage = config('app.name');
@@ -60,8 +62,8 @@ class PageController extends Controller
     public function articles()
     {
 
-       
-        return view('pages.articles', ['articles' => $this->articles]);
+        $article = Article::all();
+        return view('pages.articles', ['articles' => $article]);
 
     }
     public function article($article)
