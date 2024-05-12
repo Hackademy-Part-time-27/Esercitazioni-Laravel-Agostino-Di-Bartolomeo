@@ -2,38 +2,84 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreArticleRequest;
 use Illuminate\Http\Request;
+
 use App\Models\Article;
+use Illuminate\Support\Facades\App;
 
 class ArticleController extends Controller
 {
+    public function index()
+    {
+        $articles = Article::where('user_id', auth()->user()->id)
+                            ->orderBy('created_at', 'DESC')
+                            ->get();
+
+        return view('articles.index', ['articles' => $articles]);
+    }
+
     public function create()
     {
-        Article::create([
-            'title' => 'Le tre motivazioni per cui dovresti amare i videogiochi!',
-            'category' => 'Videogames',
-            'description' => 'Per molti posso sembrare stupidi e irrilevanti ma giocare non è del tutto una cosa senza senso!
-Ecco le tre motivazioni per cui dovresti amarli:
-1)Da una passione può nascere un lavoro, nel mondo attuale molte persone lavorano e si gudagnano da vivere semplicemnte giocando, creando intrattenimento.
-2)Possono essere stimolnati e pieni di logica, molti videogiochi si basano sulla strategia e sulla logica e inducono il cervello umano a uno sforzo inimmaginabile.
-3)I videogiochi ti traspostrano nel mondo dei tuoi sogni, da un gioco puoi aspettarti letteralmente di tutto, non esiste un limite è letteralmente tutto possibile.',
-"visible" => true,
+        return view('articles.create',['categories' => \App\Models\Category::all()]);
+    }
+
+    public function store(StoreArticleRequest $request)
+    {
+
+   
+        $article = Article::create(array_merge($request->all(), ['user_id' => auth()->user()->id]));
+
+        if ($request->hasFile('image') && $request->file('image')->isValid()) {
+
+            $extension = $request->file('image')->extension();
+
+            $fileName = 'image.' . $extension;
+
+            $fileName = $request->file('image')->getClientOriginalName();
+
+            $fileName = uniqid('image_') . '.' . $extension;
+
+            $article->image = $request->file('image')->storeAs('public/images/' . $article->id, $fileName);
+
+            $article->save();
+
+        }
+      
+        return redirect()->route('articles.index')->with(['success' => 'Articolo creato correttamente!']);
+    }
+
+
+    public function edit(Article $article)
+    {
+        if($article->user_id !== auth()->user()->id) {
+            abort(403);
+        }
+
+        return view('articles.edit', [
+            'article' => $article,
+            'categories' => \App\Models\Category::all(),
         ]);
-        Article::create([
-            'title' => 'I tre videogiochi consigliati!',
-            'category' => 'Videogames',
-            'description' => 'Il mondo dei videogiochi è talmente ampio che risulterebbe impossible nominare solo 3 videogiochi, quindi oggi ne nomineremo uno per genere da un singleplayer a un gioco per famiglia.
-            1)The legend of Zelda!
-            2)GTA V.
-            3)Super Mario Party.',
-            "visible" => true,
-        ]);
-        Article::create([
-         'title' => 'Nessun limite di età',
-                'category' => 'Videogames',
-                'description' => 'Il mondo dei videogiochi è cosi vasto da permettere di usufruirne a tutti, da i più grandi ai più piccoli!',
-                "visible" => true
-        ]);
+    }
+
+
+
+    public function update(StoreArticleRequest $request, Article $article)
+    {
+        if($article->user_id !== auth()->user()->id) {
+            abort(403);
+        }
+
+        $article->update($request->all());
+
+      
+
+        return redirect()->back()->with(['success' => 'Articolo modificato correttamente!']);
+    }
+
+    public function destroy(Article $article){
+        $article->delete();
+        return redirect()->back()->with(['success' => 'Articolo cancellato correttamente!']);
     }
 }
 

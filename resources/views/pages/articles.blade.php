@@ -4,14 +4,13 @@
         <div>
             @if($articles)
                 <ul>
-                    @foreach($articles as $index => $article)
+                    @foreach($articles as $article)
                     @if($article['visible'])
-                    <x-card
-                    :index="$index"
-                    :title="$article['title']"
-                    :description="$article['description']"
-                    :category="$article['category']"
-                    :route="route('article', $index)"
+                    <x-card               
+                    :title="$article->title"
+                    :description="$article->description"
+                    :category="$article->category"
+                    :route="route('article',$article->id)"
                     />
                     @endif
                     @endforeach

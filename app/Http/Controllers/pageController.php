@@ -61,23 +61,13 @@ class PageController extends Controller
     }
     public function articles()
     {
+        $articles = Article::where('visible', true)->get();
 
-        $article = Article::all();
-        return view('pages.articles', ['articles' => $article]);
-
+        return view('pages.articles', ['articles' => $articles]);
     }
-    public function article($article)
+
+    public function article(Article $article)
     {
-
-        $articles = $this->articles[$article];
-
-
-        if (!$articles['visible']) {
-
-            abort(404);
-        }
-
-        return view('pages.article', ['article' => $articles]);
-
+        return view('pages.article', ['article' => $article]);
     }
 }
